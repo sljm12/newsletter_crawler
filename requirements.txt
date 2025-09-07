@@ -1,0 +1,7 @@
+stomp.py
+crawl4ai
+python-dotenv
+google-genai
+openai
+readabilipy
+psycopg[binary]
