@@ -3,6 +3,9 @@ from pprint import pprint
 from pathlib import Path
 from google import genai
 import datetime
+from dotenv import load_dotenv
+import os
+
 prompt = """
 Imagine you are an editor that is tasked with reading {topic} related articles and summarize them as part of a daily newsletter for people who work in tech  to read. You are allowed to remove articles that are  or not related to {topic}. Please use your best judgement to do so. Please also categories similar articles together and put a category at the top.
 
@@ -24,9 +27,10 @@ Below are a list of articles with the following tags
 """
 
 if __name__ == "__main__":
+    load_dotenv()
     topic = "AI"
     print("Connecting to Postgres")
-    writer = writer.PostgresWriter("postgresql://postgres:mysecretpassword@127.0.0.1:5432/postgres")
+    writer = writer.PostgresWriter(os.getenv("db_conn"))
     print("Connection established")
     rows = writer.retrive(topic,"2025-09-07 00:00:00","2025-09-09 00:00:00")
     output = ""
@@ -37,7 +41,7 @@ if __name__ == "__main__":
         output += "<Article> "+str(r[0])+"</Article>\n" 
         output += "<Title> "+r[1]+"</Title>\n"
         output += "<URL> "+r[2]+"</URL>\n"
-        output += "<Text>\n"+text+"\n</Text>\n"
+        output += "<Text>\n"+r[5]+"\n</Text>\n"
 
     date_str = datetime.date.today().strftime("%Y-%m-%d")
     Path("./newsletter/newsletter_prompt_"+date_str+".txt").write_text(prompt +"\n\n" + output, "utf8")        
