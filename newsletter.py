@@ -24,23 +24,23 @@ Below are a list of articles with the following tags
 """
 
 if __name__ == "__main__":
-    topic = "SoftwareEngineering"
+    topic = "AI"
     print("Connecting to Postgres")
     writer = writer.PostgresWriter("postgresql://postgres:mysecretpassword@127.0.0.1:5432/postgres")
     print("Connection established")
-    rows = writer.retrive(topic,"2025-09-01 00:00:00","2025-09-03 00:00:00")
+    rows = writer.retrive(topic,"2025-09-07 00:00:00","2025-09-09 00:00:00")
     output = ""
     
     for r in rows:
         print(r)
-        text = Path("./extracts/"+str(r[0])+".md").read_text("utf8")
+        #text = Path("./extracts/"+str(r[0])+".md").read_text("utf8")
         output += "<Article> "+str(r[0])+"</Article>\n" 
         output += "<Title> "+r[1]+"</Title>\n"
         output += "<URL> "+r[2]+"</URL>\n"
         output += "<Text>\n"+text+"\n</Text>\n"
 
     date_str = datetime.date.today().strftime("%Y-%m-%d")
-    Path("./newsletter_prompt_"+date_str+".txt").write_text(prompt +"\n\n" + output, "utf8")        
+    Path("./newsletter/newsletter_prompt_"+date_str+".txt").write_text(prompt +"\n\n" + output, "utf8")        
     #pprint(rows)
     
     client = genai.Client()

@@ -11,7 +11,7 @@ def set_crawler_config(url :str):
 
 
 async def web_crawl(url, content_extractor):
-    browser_conf = BrowserConfig(headless=False)            
+    browser_conf = BrowserConfig(headless=True)            
     
     crawl_config=CrawlerRunConfig(delay_before_return_html=10)
 

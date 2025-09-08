@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
     writer = PostgresWriter(os.getenv("db_conn"))
     
-    d = Path("os.getenv('json_data')")
+    d = Path(os.getenv('json_data'))
     
     files = d.glob("*.json")
     print(files)
