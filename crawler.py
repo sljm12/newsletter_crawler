@@ -20,10 +20,14 @@ async def web_crawl(url, content_extractor):
             url=url,
             config=crawl_config            
         )
-        Path("crawler.output.text").write_text(result.markdown, "utf8")
-        content = content_extractor.extract_content(result)
+        if result is not None:            
+            #Path("crawler.output.text").write_text(result.markdown, "utf8")
+            content = content_extractor.extract_content(result)
         
-        return content
+            return content
+        else:
+            print("Crawling failed or no content found.")
+            return None
 
 if __name__ == "__main__":
     

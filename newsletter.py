@@ -6,14 +6,20 @@ import datetime
 from dotenv import load_dotenv
 import os
 
+'''
+You are allowed to remove articles that are  or not related to {topic}. Please use your best judgement to do so.
+'''
+
 prompt = """
-Imagine you are an editor that is tasked with reading {topic} related articles and summarize them as part of a daily newsletter for people who work in tech  to read. You are allowed to remove articles that are  or not related to {topic}. Please use your best judgement to do so. Please also categories similar articles together and put a category at the top.
+Imagine you are an editor that is tasked with reading {topic} related articles and summarize them as part of a daily newsletter for people who work in tech such as Product Managers, Developers, Technical Management etc to read. Please also categories similar articles together and put a category at the top.
 
 The format of the newletter should be in the following format:
 1. Title 
 2. A brief summary roughly a paragraph size.
 
 PLease output in markdown format. Make the article title link to the url of the article.
+
+If the article is not in English, please translate it to English.
 
 Below are a list of articles with the following tags
 
@@ -32,7 +38,8 @@ if __name__ == "__main__":
     print("Connecting to Postgres")
     writer = writer.PostgresWriter(os.getenv("db_conn"))
     print("Connection established")
-    rows = writer.retrive(topic,"2025-09-07 00:00:00","2025-09-09 00:00:00")
+    rows = writer.retrive(topic,"2025-09-08 00:00:00","2025-09-12 00:00:00")
+    rows = [r for r in rows if r[5] is not None and len(r[5].strip())>0]
     output = ""
     
     for r in rows:
@@ -49,7 +56,7 @@ if __name__ == "__main__":
     
     client = genai.Client()
     response = client.models.generate_content(
-        model="gemini-2.5-flash", 
+        model="gemini-2.0-flash", 
         contents=prompt.format(topic=topic) +"\n\n" + output)    
 
     filename = date_str + "-"+topic+"-newsletter.md"

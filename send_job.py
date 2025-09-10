@@ -1,6 +1,6 @@
 from writer import PostgresWriter
 import argparse
-from datetime import datetime
+from datetime import datetime, timedelta
 from pprint import pprint
 import stomp
 from dotenv import load_dotenv
@@ -44,7 +44,7 @@ Example: --categories sports news
     parser.add_argument(
         '--start-date',
         type=str,
-        required=True,
+        required=False,
         help="""\
 The start date of the range in YYYY-MM-DD format.
 Example: --start-date 2023-01-01
@@ -56,12 +56,20 @@ Example: --start-date 2023-01-01
     parser.add_argument(
         '--end-date',
         type=str,
-        required=True,
+        required=False,
         help="""\
 The end date of the range in YYYY-MM-DD format.
 Example: --end-date 2023-03-31
 """
     )
+
+    parser.add_argument(
+        '--last-n-days',
+        type=int,
+        required=False,
+        help="""\
+If specified, overrides start-date and end-date to cover the last N days.
+""")
 
     # Parse the arguments from the command line.
     # This function automatically handles validation and displays help messages if needed.
@@ -95,7 +103,22 @@ if __name__ == "__main__":
     conn.connect(os.getenv("stomp_user"),os.getenv("stomp_pw"),wait=True)
 
     print(arguments)
-    rows = writer.retrive_categories(arguments.categories, arguments.start_date+" 00:00:00", arguments.end_date+" 00:00:00", has_webcontent=False)
+
+    if arguments.last_n_days is not None:
+        end_date = datetime.today().date() + timedelta(days=1)  # Include today
+        start_date = end_date - timedelta(days=arguments.last_n_days)
+        start_date = start_date.strftime('%Y-%m-%d')
+        end_date = end_date.strftime('%Y-%m-%d')
+    else:
+        if arguments.start_date is None or arguments.end_date is None:
+            print("Error: Either --last-n-days or both --start-date and --end-date must be provided.")
+            exit(1)
+        start_date, end_date = validate_dates(arguments.start_date, arguments.end_date)
+        if start_date is None or end_date is None:
+            exit(1)   
+
+    rows = writer.retrive_categories(arguments.categories, start_date+" 00:00:00", end_date+" 00:00:00", has_webcontent=False)
+
     print("Retrieved rows:" + str(len(rows)))
     for r in rows:
         conn.send(
